@@ -45,6 +45,12 @@
                         <i class="fas fa-search me-1"></i> Cari Buku
                     </a>
                 </li>
+                <li class="nav-item px-2">
+                    <a class="nav-link {{ request()->is('users*') ? 'active' : '' }}"
+                        href="{{ route('user.search') }}">
+                        <i class="fas fa-users me-1"></i> Cari Pengguna
+                    </a>
+                </li>
                 @endif
                 @endauth
             </ul>
@@ -77,7 +83,16 @@
                         <li>
                             <hr class="dropdown-divider my-1">
                         </li>
-
+                        @if(auth()->user()->isAdmin())
+                        <li>
+                            <a class="dropdown-item py-2" href="{{ route('buku.index') }}">
+                                <i class="fas fa-book me-2 text-muted"></i> Lihat Koleksi Buku
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider my-1">
+                        </li>
+                        @endif
                         <li>
                             <a class="dropdown-item py-2" href="{{ route('profile.show') }}">
                                 <i class="fas fa-user me-2 text-muted"></i> Profil Saya

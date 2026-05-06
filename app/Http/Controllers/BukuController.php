@@ -114,6 +114,11 @@ class BukuController extends Controller
             'tanggal_selesai'  => 'nullable|date|after_or_equal:tanggal_mulai',
         ]);
 
+        // Rating hanya boleh jika status Selesai Dibaca
+        if ($validated['status'] !== 'Selesai Dibaca') {
+            $validated['rating'] = null;
+        }
+
         // Pastikan buku ada di DB kita
         $book = Book::firstOrCreate(
             ['google_books_id' => $validated['google_books_id']],
@@ -150,6 +155,11 @@ class BukuController extends Controller
             'tanggal_mulai'    => 'nullable|date',
             'tanggal_selesai'  => 'nullable|date|after_or_equal:tanggal_mulai',
         ]);
+
+        // Rating hanya boleh jika status Selesai Dibaca
+        if ($validated['status'] !== 'Selesai Dibaca') {
+            $validated['rating'] = null;
+        }
 
         $book = Book::where('google_books_id', $googleBooksId)->firstOrFail();
 

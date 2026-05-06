@@ -216,7 +216,8 @@
                             <input type="date" name="tanggal_selesai" class="form-control rounded-3"
                                 value="{{ $userBook?->tanggal_selesai?->format('Y-m-d') }}">
                         </div>
-                        <div class="col-12">
+                        <div class="col-12" id="ratingSection"
+                             style="{{ ($userBook?->status ?? '') !== 'Selesai Dibaca' ? 'display:none;' : '' }}">
                             <label class="section-title">Rating</label>
                             <div class="d-flex gap-1 align-items-center">
                                 @for($i = 1; $i <= 5; $i++)
@@ -228,6 +229,7 @@
                                     {{ $userBook?->rating ? $userBook->rating . '/5' : 'Belum dinilai' }}
                                 </span>
                             </div>
+                            <small class="text-muted mt-1 d-block">Rating hanya bisa diberikan setelah buku selesai dibaca.</small>
                         </div>
                         <div class="col-12">
                             <label class="section-title">Ulasan</label>
@@ -311,6 +313,27 @@
         document.querySelectorAll('.star-btn').forEach((btn, idx) => {
             btn.classList.toggle('active', idx < val);
         });
+    }
+
+    // Tampilkan/sembunyikan rating berdasarkan status
+    const statusSelect = document.querySelector('select[name="status"]');
+    const ratingSection = document.getElementById('ratingSection');
+
+    function toggleRating() {
+        if (!statusSelect || !ratingSection) return;
+        if (statusSelect.value === 'Selesai Dibaca') {
+            ratingSection.style.display = '';
+        } else {
+            ratingSection.style.display = 'none';
+            // Reset rating jika status bukan selesai
+            document.getElementById('ratingInput').value = '';
+            document.getElementById('ratingLabel').textContent = 'Belum dinilai';
+            document.querySelectorAll('.star-btn').forEach(btn => btn.classList.remove('active'));
+        }
+    }
+
+    if (statusSelect) {
+        statusSelect.addEventListener('change', toggleRating);
     }
 
     function toggleDesc(e) {

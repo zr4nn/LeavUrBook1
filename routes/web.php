@@ -32,15 +32,17 @@ Route::middleware('auth')->group(function () {
     Route::delete('/buku/{googleBooksId}', [BukuController::class, 'destroy'])->name('buku.destroy');
 
     // Profil sendiri
-    Route::get('/profile',           [ProfileController::class, 'show'])->name('profile.show');
-    Route::put('/profile',           [ProfileController::class, 'update'])->name('profile.update');
-    Route::put('/profile/avatar',    [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
-    Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar'])->name('profile.avatar.delete');
-    Route::put('/profile/password',  [ProfileController::class, 'updatePassword'])->name('profile.password');
-    Route::delete('/profile',        [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile',                [ProfileController::class, 'show'])->name('profile.show');
+    Route::put('/profile',                [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/avatar',         [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
+    Route::delete('/profile/avatar',      [ProfileController::class, 'deleteAvatar'])->name('profile.avatar.delete');
+    Route::put('/profile/password',       [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::post('/profile/verify-password',[ProfileController::class, 'verifyPassword'])->name('profile.verify-password');
+    Route::delete('/profile',             [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Profil publik user lain
-    Route::get('/user/{user}', [ProfileController::class, 'showPublic'])->name('profile.public');
+    // Pencarian & profil publik user lain
+    Route::get('/users',          [ProfileController::class, 'search'])->name('user.search');
+    Route::get('/user/{user}',    [ProfileController::class, 'showPublic'])->name('profile.public');
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

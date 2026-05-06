@@ -13,6 +13,32 @@ use Illuminate\Validation\Rules\Password;
 class ProfileController extends Controller
 {
     // -------------------------------------------------------------------------
+    // CARI USER
+    // -------------------------------------------------------------------------
+    public function search(Request $request)
+    {
+        $query = $request->input('q', '');
+        $users = collect();
+
+        if ($query) {
+            $users = User::where('role', 'user')
+                ->where(function ($q) use ($query) {
+                    $q->where('name', 'like', "%{$query}%")
+                      ->orWhere('username', 'like', "%{$query}%");
+                })
+                ->where('id', '!=', auth()->id()) // jangan tampilkan diri sendiri
+                ->withCount('userBooks')
+                ->withCount(['userBooks as selesai_count' => function ($q) {
+                    $q->where('status', 'Selesai Dibaca');
+                }])
+                ->latest()
+                ->get();
+        }
+
+        return view('profile.search', compact('query', 'users'));
+    }
+
+    // -------------------------------------------------------------------------
     // PROFIL PUBLIK USER LAIN
     // -------------------------------------------------------------------------
     public function showPublic(User $user)
@@ -30,6 +56,25 @@ class ProfileController extends Controller
         ];
 
         return view('profile.public', compact('user', 'userBooks', 'stats'));
+    }
+
+    // -------------------------------------------------------------------------
+    // VERIFIKASI PASSWORD (AJAX) — untuk fitur lihat password
+    // -------------------------------------------------------------------------
+    public function verifyPassword(Request $request)
+    {
+        $request->validate(['password' => 'required|string']);
+
+        $user = auth()->user();
+
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json(['success' => false]);
+        }
+
+        return response()->json([
+            'success'  => true,
+            'password' => $request->password, // kembalikan password yang diinput user
+        ]);
     }
 
     // -------------------------------------------------------------------------

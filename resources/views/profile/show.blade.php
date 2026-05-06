@@ -13,17 +13,39 @@
         box-shadow: 0 0 0 0.25rem rgba(196,137,74,0.1);
         background-color: white;
     }
-    .nav-pills .nav-link {
-        color: var(--ink, #333);
+
+    /* Tab buttons */
+    .tab-btn {
+        border: 1.5px solid var(--border, #dee2e6);
+        background: white;
         border-radius: 50px;
-        padding: 0.5rem 1.25rem;
-        font-size: 0.875rem;
+        padding: 0.45rem 1.1rem;
+        font-size: 0.82rem;
         font-weight: 500;
+        color: #555;
+        cursor: pointer;
+        transition: all 0.15s;
+        white-space: nowrap;
     }
-    .nav-pills .nav-link.active {
+    .tab-btn:hover {
+        border-color: var(--amber, #C4894A);
+        color: var(--amber, #C4894A);
+        background: #fffaf5;
+    }
+    .tab-btn.active {
         background-color: var(--amber, #C4894A);
+        border-color: var(--amber, #C4894A);
         color: white;
     }
+    .tab-btn-danger { border-color: #f5c6cb; color: #dc3545; }
+    .tab-btn-danger:hover { background: #fff5f5; border-color: #dc3545; color: #dc3545; }
+    .tab-btn-danger.active-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+
+    /* Avatar */
     .avatar-wrapper {
         position: relative;
         width: 120px;
@@ -55,6 +77,8 @@
         transition: transform 0.2s;
     }
     .avatar-edit-btn:hover { transform: scale(1.1); }
+
+    /* Stat pill */
     .stat-pill {
         background: var(--warm-white, #f8f8f8);
         border: 1px solid var(--border, #eee);
@@ -64,10 +88,52 @@
         text-align: center;
         min-width: 90px;
     }
+
+    /* Danger zone */
     .danger-zone {
         border: 1px solid #f8d7da;
         border-radius: 12px;
         background: #fff5f5;
+    }
+
+    /* Password reveal */
+    .password-field-wrapper {
+        position: relative;
+    }
+    .password-field-wrapper .toggle-pass {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #adb5bd;
+        cursor: pointer;
+        padding: 0;
+        font-size: 0.9rem;
+        z-index: 5;
+    }
+    .password-field-wrapper .toggle-pass:hover { color: var(--amber, #C4894A); }
+
+    /* Password display box */
+    .password-display-box {
+        background: #f8f9fa;
+        border: 1px solid var(--border, #dee2e6);
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+    }
+    .password-stars {
+        font-size: 1.5rem;
+        letter-spacing: 4px;
+        color: #adb5bd;
+        font-family: monospace;
+    }
+    .password-reveal-text {
+        font-size: 1.1rem;
+        font-family: monospace;
+        letter-spacing: 2px;
+        color: var(--ink);
+        word-break: break-all;
     }
 </style>
 
@@ -82,7 +148,7 @@
 
         {{-- HEADER PROFIL --}}
         <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-            <div class="d-flex align-items-center gap-4 flex-wrap">
+            <div class="d-flex align-items-start gap-4 flex-wrap">
 
                 {{-- Avatar --}}
                 <div class="avatar-wrapper flex-shrink-0">
@@ -122,11 +188,13 @@
                     </div>
                 </div>
 
+                {{-- Hapus foto — dipisah agar tidak nabrak --}}
                 @if($user->avatar)
                 <form action="{{ route('profile.avatar.delete') }}" method="POST"
-                      onsubmit="return confirm('Hapus foto profil?')">
+                      onsubmit="return confirm('Hapus foto profil?')" class="flex-shrink-0">
                     @csrf @method('DELETE')
-                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                    <button type="submit" class="btn btn-sm rounded-pill px-3"
+                            style="border: 1.5px solid #dc3545; color: #dc3545; background: white;">
                         <i class="fas fa-trash me-1"></i> Hapus Foto
                     </button>
                 </form>
@@ -141,7 +209,7 @@
                     <div class="text-muted" style="font-size:0.7rem;">Total Buku</div>
                 </div>
                 <div class="stat-pill">
-                    <div class="fw-bold text-warning">{{ $stats['sedang_dibaca'] }}</div>
+                    <div class="fw-bold" style="color: var(--amber, #C4894A);">{{ $stats['sedang_dibaca'] }}</div>
                     <div class="text-muted" style="font-size:0.7rem;">Sedang Dibaca</div>
                 </div>
                 <div class="stat-pill">
@@ -156,29 +224,29 @@
         </div>
 
         {{-- TABS --}}
-        <ul class="nav nav-pills mb-4 gap-2" id="profileTab">
-            <li class="nav-item">
-                <button class="nav-link {{ !in_array(session('tab'), ['password','hapus']) ? 'active' : '' }}"
-                        onclick="switchTab('edit')">
+        <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+            <div class="d-flex flex-wrap gap-2">
+                <button class="tab-btn {{ !in_array(session('tab'), ['password','lihat-password','hapus']) ? 'active' : '' }}"
+                        onclick="switchTab('edit')" id="btnEdit">
                     <i class="fas fa-user-edit me-1"></i> Edit Profil
                 </button>
-            </li>
-            <li class="nav-item">
-                <button class="nav-link {{ session('tab') == 'password' ? 'active' : '' }}"
-                        onclick="switchTab('password')">
+                <button class="tab-btn {{ session('tab') == 'password' ? 'active' : '' }}"
+                        onclick="switchTab('password')" id="btnPassword">
                     <i class="fas fa-lock me-1"></i> Ganti Password
                 </button>
-            </li>
-            <li class="nav-item">
-                <button class="nav-link {{ session('tab') == 'hapus' ? 'active' : '' }}"
-                        id="btnHapus" onclick="switchTab('hapus')">
+                <button class="tab-btn {{ session('tab') == 'lihat-password' ? 'active' : '' }}"
+                        onclick="switchTab('lihat-password')" id="btnLihatPassword">
+                    <i class="fas fa-eye me-1"></i> Lihat Password
+                </button>
+                <button class="tab-btn tab-btn-danger {{ session('tab') == 'hapus' ? 'active-danger' : '' }}"
+                        onclick="switchTab('hapus')" id="btnHapus">
                     <i class="fas fa-user-times me-1"></i> Hapus Akun
                 </button>
-            </li>
-        </ul>
+            </div>
+        </div>
 
         {{-- TAB EDIT PROFIL --}}
-        <div id="tab-edit" class="tab-pane {{ in_array(session('tab'), ['password','hapus']) ? 'd-none' : '' }}">
+        <div id="tab-edit" class="tab-pane {{ in_array(session('tab'), ['password','lihat-password','hapus']) ? 'd-none' : '' }}">
             <div class="card border-0 shadow-sm rounded-4 p-4">
                 <h5 class="fw-bold mb-4" style="color:var(--ink);">Edit Profil</h5>
                 <form action="{{ route('profile.update') }}" method="POST">
@@ -219,7 +287,7 @@
                             </div>
                         </div>
                         <div class="col-12 text-end mt-2">
-                            <hr class="opacity-10">
+                            <hr class="opacity-10 mb-3">
                             <button type="submit" class="btn rounded-pill px-5"
                                     style="background-color:var(--amber,#C4894A); color:white; border:none;">
                                 <i class="fas fa-save me-2"></i> Simpan Perubahan
@@ -239,25 +307,40 @@
                     <div class="row g-3">
                         <div class="col-12">
                             <label class="form-label fw-bold small text-muted text-uppercase">Password Lama</label>
-                            <input type="password" name="current_password"
-                                class="form-control rounded-3 @error('current_password') is-invalid @enderror"
-                                placeholder="Password saat ini">
-                            @error('current_password')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="password-field-wrapper">
+                                <input type="password" name="current_password" id="currentPass"
+                                    class="form-control rounded-3 @error('current_password') is-invalid @enderror"
+                                    placeholder="Password saat ini">
+                                <button type="button" class="toggle-pass" onclick="togglePass('currentPass', 'eyeCurrent')">
+                                    <i class="fas fa-eye" id="eyeCurrent"></i>
+                                </button>
+                            </div>
+                            @error('current_password')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold small text-muted text-uppercase">Password Baru</label>
-                            <input type="password" name="password"
-                                class="form-control rounded-3 @error('password') is-invalid @enderror"
-                                placeholder="Min. 8 karakter">
-                            @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="password-field-wrapper">
+                                <input type="password" name="password" id="newPass"
+                                    class="form-control rounded-3 @error('password') is-invalid @enderror"
+                                    placeholder="Min. 8 karakter">
+                                <button type="button" class="toggle-pass" onclick="togglePass('newPass', 'eyeNew')">
+                                    <i class="fas fa-eye" id="eyeNew"></i>
+                                </button>
+                            </div>
+                            @error('password')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold small text-muted text-uppercase">Konfirmasi Password Baru</label>
-                            <input type="password" name="password_confirmation"
-                                class="form-control rounded-3" placeholder="Ulangi password baru">
+                            <div class="password-field-wrapper">
+                                <input type="password" name="password_confirmation" id="confirmPass"
+                                    class="form-control rounded-3" placeholder="Ulangi password baru">
+                                <button type="button" class="toggle-pass" onclick="togglePass('confirmPass', 'eyeConfirm')">
+                                    <i class="fas fa-eye" id="eyeConfirm"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="col-12 text-end mt-2">
-                            <hr class="opacity-10">
+                            <hr class="opacity-10 mb-3">
                             <button type="submit" class="btn rounded-pill px-5"
                                     style="background-color:var(--amber,#C4894A); color:white; border:none;">
                                 <i class="fas fa-key me-2"></i> Perbarui Password
@@ -265,6 +348,62 @@
                         </div>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        {{-- TAB LIHAT PASSWORD --}}
+        <div id="tab-lihat-password" class="tab-pane {{ session('tab') == 'lihat-password' ? '' : 'd-none' }}">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold mb-1" style="color:var(--ink);">
+                    <i class="fas fa-eye me-2" style="color:var(--amber,#C4894A);"></i>Lihat Password
+                </h5>
+                <p class="text-muted small mb-4">Masukkan password lama untuk memverifikasi identitasmu.</p>
+
+                {{-- Form verifikasi --}}
+                <div id="verifySection">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Verifikasi dengan Password Lama</label>
+                            <div class="password-field-wrapper">
+                                <input type="password" id="verifyInput"
+                                    class="form-control rounded-3"
+                                    placeholder="Masukkan passwordmu">
+                                <button type="button" class="toggle-pass" onclick="togglePass('verifyInput', 'eyeVerify')">
+                                    <i class="fas fa-eye" id="eyeVerify"></i>
+                                </button>
+                            </div>
+                            <div class="text-danger small mt-1 d-none" id="verifyError">Password salah. Coba lagi.</div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="button" class="btn rounded-pill px-4 w-100"
+                                    style="background-color:var(--amber,#C4894A); color:white; border:none;"
+                                    onclick="verifyPassword()">
+                                <i class="fas fa-unlock me-2"></i> Verifikasi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Hasil password (tersembunyi awalnya) --}}
+                <div id="passwordResult" class="d-none mt-4">
+                    <div class="password-display-box">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold small text-muted text-uppercase">Password Kamu</span>
+                            <button type="button" class="btn btn-sm rounded-pill px-3"
+                                    style="border: 1.5px solid var(--amber,#C4894A); color:var(--amber,#C4894A); background:white; font-size:0.75rem;"
+                                    onclick="togglePasswordDisplay()">
+                                <i class="fas fa-eye me-1" id="eyeDisplay"></i>
+                                <span id="eyeDisplayText">Tampilkan</span>
+                            </button>
+                        </div>
+                        <div class="password-stars" id="passStars">••••••••••••</div>
+                        <div class="password-reveal-text d-none" id="passText"></div>
+                    </div>
+                    <div class="mt-3 d-flex align-items-center gap-2">
+                        <i class="fas fa-info-circle text-muted"></i>
+                        <small class="text-muted">Jangan bagikan passwordmu kepada siapapun.</small>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -282,10 +421,15 @@
                     @csrf @method('DELETE')
                     <div class="mb-3">
                         <label class="form-label fw-bold small text-muted text-uppercase">Konfirmasi dengan Password</label>
-                        <input type="password" name="confirm_password"
-                            class="form-control rounded-3 @error('confirm_password') is-invalid @enderror"
-                            placeholder="Masukkan passwordmu untuk konfirmasi">
-                        @error('confirm_password')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        <div class="password-field-wrapper">
+                            <input type="password" name="confirm_password" id="deletePass"
+                                class="form-control rounded-3 @error('confirm_password') is-invalid @enderror"
+                                placeholder="Masukkan passwordmu untuk konfirmasi">
+                            <button type="button" class="toggle-pass" onclick="togglePass('deletePass', 'eyeDelete')">
+                                <i class="fas fa-eye" id="eyeDelete"></i>
+                            </button>
+                        </div>
+                        @error('confirm_password')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                     </div>
                     <button type="submit" class="btn btn-danger rounded-pill px-5">
                         <i class="fas fa-trash me-2"></i> Hapus Akun Saya
@@ -298,29 +442,109 @@
 </div>
 
 <script>
+    // Switch tab
     function switchTab(tab) {
         document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('d-none'));
         document.getElementById('tab-' + tab).classList.remove('d-none');
-        document.querySelectorAll('#profileTab .nav-link').forEach(btn => {
-            btn.classList.remove('active');
-            btn.style.backgroundColor = '';
-            btn.style.color = '';
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active', 'active-danger');
         });
-        const btn = document.querySelector(`#profileTab button[onclick="switchTab('${tab}')"]`);
+
+        const map = {
+            'edit': 'btnEdit',
+            'password': 'btnPassword',
+            'lihat-password': 'btnLihatPassword',
+            'hapus': 'btnHapus'
+        };
+        const btn = document.getElementById(map[tab]);
         if (btn) {
-            btn.classList.add('active');
-            if (tab === 'hapus') {
-                btn.style.backgroundColor = '#dc3545';
-                btn.style.color = 'white';
-            }
+            if (tab === 'hapus') btn.classList.add('active-danger');
+            else btn.classList.add('active');
         }
     }
 
-    // Set tab hapus style on load jika aktif
+    // Set active tab on load
     @if(session('tab') == 'hapus')
-        document.getElementById('btnHapus').style.backgroundColor = '#dc3545';
-        document.getElementById('btnHapus').style.color = 'white';
+        document.getElementById('btnHapus').classList.add('active-danger');
+    @elseif(session('tab') == 'password')
+        document.getElementById('btnPassword').classList.add('active');
+    @elseif(session('tab') == 'lihat-password')
+        document.getElementById('btnLihatPassword').classList.add('active');
+    @else
+        document.getElementById('btnEdit').classList.add('active');
     @endif
+
+    // Toggle show/hide password input
+    function togglePass(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon  = document.getElementById(iconId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+
+    // Verifikasi password via AJAX
+    function verifyPassword() {
+        const password = document.getElementById('verifyInput').value;
+        const errEl    = document.getElementById('verifyError');
+        const resultEl = document.getElementById('passwordResult');
+
+        if (!password) {
+            errEl.textContent = 'Masukkan passwordmu terlebih dahulu.';
+            errEl.classList.remove('d-none');
+            return;
+        }
+
+        fetch('{{ route("profile.verify-password") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ password })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                errEl.classList.add('d-none');
+                document.getElementById('passText').textContent = data.password;
+                resultEl.classList.remove('d-none');
+            } else {
+                errEl.textContent = 'Password salah. Coba lagi.';
+                errEl.classList.remove('d-none');
+                resultEl.classList.add('d-none');
+            }
+        })
+        .catch(() => {
+            errEl.textContent = 'Terjadi kesalahan. Coba lagi.';
+            errEl.classList.remove('d-none');
+        });
+    }
+
+    // Toggle tampil/sembunyikan password hasil
+    function togglePasswordDisplay() {
+        const stars  = document.getElementById('passStars');
+        const text   = document.getElementById('passText');
+        const icon   = document.getElementById('eyeDisplay');
+        const label  = document.getElementById('eyeDisplayText');
+
+        if (text.classList.contains('d-none')) {
+            stars.classList.add('d-none');
+            text.classList.remove('d-none');
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+            label.textContent = 'Sembunyikan';
+        } else {
+            stars.classList.remove('d-none');
+            text.classList.add('d-none');
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+            label.textContent = 'Tampilkan';
+        }
+    }
 
     // Preview avatar
     function previewAvatar(input) {
@@ -338,5 +562,10 @@
             document.getElementById('bioCount').textContent = this.value.length + '/500';
         });
     }
+
+    // Enter key untuk verifikasi password
+    document.getElementById('verifyInput')?.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); verifyPassword(); }
+    });
 </script>
 @endsection
