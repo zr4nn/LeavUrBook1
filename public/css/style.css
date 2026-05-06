@@ -1,0 +1,43 @@
+:root {
+  --cream: #F5F0E8;
+  --cream-dark: #EDE6D6;
+  --warm-white: #FAF8F4;
+  --ink: #1C1810;
+  --ink-soft: #3D3629;
+  --ink-muted: #7A7060;
+  --amber: #C4894A; /
+  --amber-light: #E8B87A;
+  --sage: #7A8C72;
+  --sage-light: #A8B8A0;
+  --blush: #D4B8A8;
+  --border: rgba(28, 24, 16, 0.10);
+  --shadow: 0 4px 24px rgba(28, 24, 16, 0.08);
+  --star:
+}
+
+/* Ini akan mengubah SEMUA tombol primary menjadi warna Amber secara otomatis */
+.btn-primary {
+    background-color: var(--amber) !important;
+    border-color: var(--amber) !important;
+    color: white !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--ink-soft) !important;
+    border-color: var(--ink-soft) !important;
+}
+
+
+/* 2. Custom Utility Classes (Pengganti text-primary dan bg-primary) */
+.text-custom-primary { color: var(--amber) !important; }
+.bg-custom-primary { background-color: var(--amber) !important; }
+.text-ink { color: var(--ink) !important; }
+
+/* 3. Reset Link */
+a {
+    color: var(--amber);
+    text-decoration: none;
+}
+a:hover {
+    color: var(--ink-soft);
+}
