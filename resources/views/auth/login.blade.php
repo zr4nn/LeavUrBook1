@@ -50,7 +50,6 @@
 
 <div class="auth-card">
     <div class="text-center mb-4">
-        <i class="fas fa-book-open fs-1 mb-2" style="color: var(--amber, #C4894A);"></i>
         <h3 class="fw-bold mb-0" style="color: var(--ink);">Login to Continue</h3>
         <p class="text-muted small mt-1">
             Scared to lose your progress? <i><u>LeavUrBook</u></i> here.

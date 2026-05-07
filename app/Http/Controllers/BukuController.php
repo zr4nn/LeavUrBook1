@@ -73,9 +73,9 @@ class BukuController extends Controller
             $book = Book::create($data);
         }
 
-        // Data user untuk buku ini (jika sudah di koleksi)
+        // Data koleksi hanya untuk pengguna biasa (bukan admin)
         $userBook = null;
-        if (auth()->check()) {
+        if (auth()->check() && ! auth()->user()->isAdmin()) {
             $userBook = UserBook::where('user_id', auth()->id())
                                 ->where('book_id', $book->id)
                                 ->first();

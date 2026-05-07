@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LeavUrBook - @yield('title')</title>
     
+    <link rel="icon" href="{{ asset('images/WhatsApp_Image_2026-05-07_at_08.14.07-removebg-preview.png') }}" type="image/png">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
@@ -46,6 +48,56 @@
         .text-warning {
             color: var(--amber) !important;
         }
+
+        /* Pagination admin — pusat, pill, selaras tema */
+        .admin-pagination {
+            text-align: center;
+        }
+
+        .admin-pagination .pagination {
+            gap: 0.35rem;
+            margin-bottom: 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .admin-pagination .page-link {
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            color: var(--ink-soft);
+            background-color: var(--warm-white);
+            padding: 0.4rem 0.9rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            min-width: 2.35rem;
+            text-align: center;
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+
+        .admin-pagination .page-link:hover {
+            background-color: var(--cream-dark);
+            border-color: rgba(196, 137, 74, 0.45);
+            color: var(--ink);
+        }
+
+        .admin-pagination .page-item.active .page-link {
+            background-color: var(--amber);
+            border-color: var(--amber);
+            color: #fff;
+        }
+
+        .admin-pagination .page-item.active .page-link:hover {
+            background-color: var(--ink-soft);
+            border-color: var(--ink-soft);
+            color: #fff;
+        }
+
+        .admin-pagination .page-item.disabled .page-link {
+            background-color: var(--cream);
+            border-color: var(--border);
+            color: var(--ink-muted);
+            opacity: 0.85;
+        }
     </style>
 </head>
 
@@ -56,6 +108,12 @@
         @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
             <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+        @if(session('info'))
+        <div class="alert alert-primary alert-dismissible fade show border-0 shadow-sm" role="alert">
+            <i class="fas fa-info-circle me-2"></i> {{ session('info') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         @endif

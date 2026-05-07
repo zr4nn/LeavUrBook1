@@ -9,7 +9,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h3 class="fw-bold mb-0" style="color: var(--ink);">Manajemen User</h3>
-        <p class="text-muted small mb-0">Total {{ $users->count() }} user terdaftar</p>
+        <p class="text-muted small mb-0">Total {{ $users->total() }} user terdaftar</p>
     </div>
     <a href="{{ route('admin.dashboard') }}" class="btn btn-light rounded-pill px-4 text-muted">
         <i class="fas fa-arrow-left me-1"></i> Dashboard
@@ -39,9 +39,9 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($users as $index => $user)
+                @forelse($users as $user)
                 <tr>
-                    <td class="text-muted small">{{ $index + 1 }}</td>
+                    <td class="text-muted small">{{ $users->firstItem() + $loop->index }}</td>
                     <td class="fw-bold small">{{ $user->name }}</td>
                     <td class="text-muted small">{{ $user->username ?? '-' }}</td>
                     <td class="text-muted small">{{ $user->email }}</td>
@@ -77,5 +77,10 @@
             </tbody>
         </table>
     </div>
+    @if($users->total() > 0 && $users->hasPages())
+    <div class="admin-pagination pt-3 border-top mt-2">
+        {{ $users->links() }}
+    </div>
+    @endif
 </div>
 @endsection

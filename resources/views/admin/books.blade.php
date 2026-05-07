@@ -25,7 +25,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h3 class="fw-bold mb-0" style="color: var(--ink);">Semua Buku</h3>
-        <p class="text-muted small mb-0">Total {{ $books->count() }} buku dalam database</p>
+        <p class="text-muted small mb-0">Total {{ $books->total() }} buku dalam database</p>
     </div>
     <a href="{{ route('admin.dashboard') }}" class="btn btn-light rounded-pill px-4 text-muted">
         <i class="fas fa-arrow-left me-1"></i> Dashboard
@@ -54,9 +54,9 @@
                 @php
                     $palettes = ['#5C6BC0','#26A69A','#EF5350','#AB47BC','#42A5F5','#66BB6A','#FFA726','#8D6E63'];
                 @endphp
-                @forelse($books as $index => $book)
+                @forelse($books as $book)
                 <tr>
-                    <td class="text-muted small">{{ $index + 1 }}</td>
+                    <td class="text-muted small">{{ $books->firstItem() + $loop->index }}</td>
                     <td>
                         @if($book->cover_url)
                             <img src="{{ $book->cover_url }}" class="book-thumb" alt="{{ $book->judul }}">
@@ -86,5 +86,10 @@
             </tbody>
         </table>
     </div>
+    @if($books->total() > 0 && $books->hasPages())
+    <div class="admin-pagination pt-3 border-top mt-2">
+        {{ $books->links() }}
+    </div>
+    @endif
 </div>
 @endsection

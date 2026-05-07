@@ -114,33 +114,39 @@
             @endif
         </div>
 
-        {{-- Tombol aksi --}}
-        @if($userBook)
-            <div class="d-grid gap-2">
-                <span class="badge rounded-pill py-2
-                    {{ $userBook->status == 'Selesai Dibaca' ? 'bg-success' : ($userBook->status == 'Sedang Dibaca' ? 'bg-warning text-dark' : 'bg-secondary') }}">
-                    {{ $userBook->status }}
-                </span>
-                <button class="btn btn-sm btn-outline-secondary rounded-pill"
-                        data-bs-toggle="collapse" data-bs-target="#formKoleksi">
-                    <i class="fas fa-edit me-1"></i> Edit Koleksi
-                </button>
-                <form action="{{ route('buku.destroy', $book->google_books_id) }}" method="POST"
-                      onsubmit="return confirm('Hapus dari koleksi?')">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill w-100">
-                        <i class="fas fa-trash me-1"></i> Hapus dari Koleksi
+        {{-- Tombol koleksi — hanya pengguna biasa --}}
+        @unless(auth()->user()->isAdmin())
+            @if($userBook)
+                <div class="d-grid gap-2">
+                    <span class="badge rounded-pill py-2
+                        {{ $userBook->status == 'Selesai Dibaca' ? 'bg-success' : ($userBook->status == 'Sedang Dibaca' ? 'bg-warning text-dark' : 'bg-secondary') }}">
+                        {{ $userBook->status }}
+                    </span>
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill"
+                            data-bs-toggle="collapse" data-bs-target="#formKoleksi">
+                        <i class="fas fa-edit me-1"></i> Edit Koleksi
                     </button>
-                </form>
-            </div>
+                    <form action="{{ route('buku.destroy', $book->google_books_id) }}" method="POST"
+                          onsubmit="return confirm('Hapus dari koleksi?')">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill w-100">
+                            <i class="fas fa-trash me-1"></i> Hapus dari Koleksi
+                        </button>
+                    </form>
+                </div>
+            @else
+                <div class="d-grid">
+                    <button class="btn btn-amber rounded-pill py-2"
+                            data-bs-toggle="collapse" data-bs-target="#formKoleksi">
+                        <i class="fas fa-plus me-2"></i> Tambah ke Koleksi
+                    </button>
+                </div>
+            @endif
         @else
-            <div class="d-grid">
-                <button class="btn btn-amber rounded-pill py-2"
-                        data-bs-toggle="collapse" data-bs-target="#formKoleksi">
-                    <i class="fas fa-plus me-2"></i> Tambah ke Koleksi
-                </button>
-            </div>
-        @endif
+            <p class="small text-muted mb-0">
+                Akun admin tidak memiliki koleksi pribadi. Kelola katalog lewat menu <strong>Semua Buku</strong>.
+            </p>
+        @endunless
     </div>
 
     {{-- KOLOM KANAN --}}
@@ -178,6 +184,7 @@
         @endif
 
         {{-- FORM TAMBAH/EDIT KOLEKSI --}}
+        @unless(auth()->user()->isAdmin())
         <div class="collapse" id="formKoleksi">
             <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
                 <h6 class="fw-bold mb-3">{{ $userBook ? 'Edit Koleksi' : 'Tambah ke Koleksi' }}</h6>
@@ -247,6 +254,7 @@
                 </form>
             </div>
         </div>
+        @endunless
 
         {{-- ULASAN USER LAIN --}}
         @if($reviews->count() > 0)
@@ -284,8 +292,8 @@
             @endforeach
         @endif
 
-        {{-- Ulasan sendiri --}}
-        @if($userBook?->ulasan)
+        {{-- Ulasan sendiri (hanya pengguna dengan koleksi) --}}
+        @if($userBook?->ulasan && !auth()->user()->isAdmin())
             <div class="section-title mt-3">Ulasanmu</div>
             <div class="review-card" style="border-color: var(--amber, #C4894A); background: #fffaf5;">
                 <div class="d-flex align-items-center gap-2 mb-2">

@@ -36,7 +36,8 @@ class AdminController extends Controller
         $users = User::where('role', 'user')
                      ->withCount('userBooks')
                      ->latest()
-                     ->get();
+                     ->paginate(10)
+                     ->withQueryString();
 
         return view('admin.users', compact('users'));
     }
@@ -70,7 +71,7 @@ class AdminController extends Controller
     // -------------------------------------------------------------------------
     public function books()
     {
-        $books = Book::withCount('userBooks')->latest()->get();
+        $books = Book::withCount('userBooks')->latest()->paginate(10)->withQueryString();
         return view('admin.books', compact('books'));
     }
 }

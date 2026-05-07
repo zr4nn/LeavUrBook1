@@ -1,7 +1,12 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top py-3">
     <div class="container">
-        <a class="navbar-brand fw-bold fs-4" href="{{ auth()->check() && auth()->user()->isAdmin() ? route('admin.dashboard') : route('buku.index') }}">
-            <i class="fa-solid fa-book-bookmark me-2"></i>LeavUrBook
+        <a class="navbar-brand fw-bold fs-4 d-inline-flex align-items-center gap-2 text-decoration-none"
+            style="color: var(--ink, #1C1810);"
+            href="{{ auth()->check() ? (auth()->user()->isAdmin() ? route('admin.dashboard') : route('buku.index')) : route('home') }}">
+            <img src="{{ asset('images/WhatsApp_Image_2026-05-07_at_08.14.07-removebg-preview.png') }}"
+                alt="LeavUrBook" width="45" height="45"
+                style="display:block; width:45px; height:45px; object-fit:cover; border-radius:14px;">
+            <span>LeavUrBook</span>
         </a>
 
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -83,16 +88,6 @@
                         <li>
                             <hr class="dropdown-divider my-1">
                         </li>
-                        @if(auth()->user()->isAdmin())
-                        <li>
-                            <a class="dropdown-item py-2" href="{{ route('buku.index') }}">
-                                <i class="fas fa-book me-2 text-muted"></i> Lihat Koleksi Buku
-                            </a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider my-1">
-                        </li>
-                        @endif
                         <li>
                             <a class="dropdown-item py-2" href="{{ route('profile.show') }}">
                                 <i class="fas fa-user me-2 text-muted"></i> Profil Saya
@@ -109,10 +104,10 @@
                     </ul>
                 </div>
                 @else
-                {{-- Belum login --}}
-                <a href="{{ route('login') }}" class="btn btn-light rounded-pill px-4 text-muted">Masuk</a>
-                <a href="{{ route('register') }}" class="btn rounded-pill px-4 text-white"
-                    style="background-color: var(--amber, #C4894A); border: none;">Daftar</a>
+                {{-- Belum login: utama ke halaman masuk --}}
+                <a href="{{ route('login') }}" class="btn rounded-pill px-4 text-white"
+                    style="background-color: var(--amber, #C4894A); border: none;">Masuk</a>
+                <a href="{{ route('register') }}" class="btn btn-light rounded-pill px-4 text-muted border">Daftar</a>
                 @endauth
             </div>
         </div>
