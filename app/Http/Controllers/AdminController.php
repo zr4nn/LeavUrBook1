@@ -31,15 +31,21 @@ class AdminController extends Controller
     // -------------------------------------------------------------------------
     // DAFTAR USER
     // -------------------------------------------------------------------------
-    public function users()
+    public function users(Request $request)
     {
-        $users = User::where('role', 'user')
-                     ->withCount('userBooks')
-                     ->latest()
-                     ->paginate(10)
-                     ->withQueryString();
+        $query = User::withCount('userBooks')->latest();
 
-        return view('admin.users', compact('users'));
+        if ($search = $request->input('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('username', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $query->paginate(10)->withQueryString();
+
+        return view('admin.users', compact('users', 'search'));
     }
 
     // -------------------------------------------------------------------------

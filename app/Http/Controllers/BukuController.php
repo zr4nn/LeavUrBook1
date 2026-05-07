@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
-use App\Models\UserBook;
+use App\Models\UserBook;    
 use App\Services\GoogleBooksService;
 use Illuminate\Http\Request;
 
@@ -14,22 +14,31 @@ class BukuController extends Controller
     // -------------------------------------------------------------------------
     // INDEX — koleksi buku milik user yang login
     // -------------------------------------------------------------------------
-    public function index()
+    public function index(Request $request)
     {
-        $userBooks = auth()->user()
-            ->userBooks()
-            ->with('book')
-            ->latest()
-            ->get();
+        $allUserBooks = auth()->user()->userBooks()->get();
 
         $stats = [
-            'total'         => $userBooks->count(),
-            'sedang_dibaca' => $userBooks->where('status', 'Sedang Dibaca')->count(),
-            'selesai'       => $userBooks->where('status', 'Selesai Dibaca')->count(),
-            'daftar_tunggu' => $userBooks->where('status', 'Daftar Tunggu')->count(),
+            'total'         => $allUserBooks->count(),
+            'sedang_dibaca' => $allUserBooks->where('status', 'Sedang Dibaca')->count(),
+            'selesai'       => $allUserBooks->where('status', 'Selesai Dibaca')->count(),
+            'daftar_tunggu' => $allUserBooks->where('status', 'Daftar Tunggu')->count(),
         ];
 
-        return view('buku.index', compact('userBooks', 'stats'));
+        $status = $request->input('status', 'semua');
+
+        $query = auth()->user()
+            ->userBooks()
+            ->with('book')
+            ->latest();
+
+        if ($status !== 'semua') {
+            $query->where('status', $status);
+        }
+
+        $userBooks = $query->paginate(12)->withQueryString();
+
+        return view('buku.index', compact('userBooks', 'stats', 'status'));
     }
 
     // -------------------------------------------------------------------------

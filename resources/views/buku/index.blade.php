@@ -94,10 +94,10 @@
 
 {{-- FILTER --}}
 <div class="d-flex gap-2 mb-4 flex-wrap">
-    <button class="filter-pill active" onclick="filterBooks('semua', this)">Semua</button>
-    <button class="filter-pill" onclick="filterBooks('Sedang Dibaca', this)">Sedang Dibaca</button>
-    <button class="filter-pill" onclick="filterBooks('Selesai Dibaca', this)">Selesai Dibaca</button>
-    <button class="filter-pill" onclick="filterBooks('Daftar Tunggu', this)">Daftar Tunggu</button>
+    <a href="{{ route('buku.index', ['status' => 'semua']) }}" class="filter-pill text-decoration-none {{ $status === 'semua' ? 'active' : '' }}" style="color: inherit;">Semua</a>
+    <a href="{{ route('buku.index', ['status' => 'Sedang Dibaca']) }}" class="filter-pill text-decoration-none {{ $status === 'Sedang Dibaca' ? 'active' : '' }}" style="color: inherit;">Sedang Dibaca</a>
+    <a href="{{ route('buku.index', ['status' => 'Selesai Dibaca']) }}" class="filter-pill text-decoration-none {{ $status === 'Selesai Dibaca' ? 'active' : '' }}" style="color: inherit;">Selesai Dibaca</a>
+    <a href="{{ route('buku.index', ['status' => 'Daftar Tunggu']) }}" class="filter-pill text-decoration-none {{ $status === 'Daftar Tunggu' ? 'active' : '' }}" style="color: inherit;">Daftar Tunggu</a>
 </div>
 
 {{-- GRID --}}
@@ -182,18 +182,10 @@
     @endforelse
 </div>
 
-<script>
-    function filterBooks(status, btn) {
-        document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        document.querySelectorAll('.book-item').forEach(item => {
-            if (status === 'semua' || item.dataset.status === status) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    }
-</script>
+{{-- PAGINATION --}}
+@if($userBooks->total() > 0 && $userBooks->hasPages())
+<div class="admin-pagination pt-3 mt-4">
+    {{ $userBooks->links() }}
+</div>
+@endif
 @endsection

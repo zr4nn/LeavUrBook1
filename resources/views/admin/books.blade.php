@@ -32,9 +32,7 @@
     </a>
 </div>
 
-@if(session('success'))
-    <div class="alert alert-success rounded-3 small py-2 mb-4">{{ session('success') }}</div>
-@endif
+
 
 <div class="card border-0 shadow-sm rounded-4 p-4">
     <div class="table-responsive">

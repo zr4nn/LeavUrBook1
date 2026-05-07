@@ -11,6 +11,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --cream: #F5F0E8;
@@ -31,6 +35,11 @@
         body {
             background-color: var(--cream);
             color: var(--ink);
+            font-family: 'Source Sans 3', system-ui, sans-serif;
+        }
+
+        .font-display {
+            font-family: 'Fraunces', Georgia, serif;
         }
 
         .navbar {
@@ -104,26 +113,76 @@
 <body>
     @include('layouts.partials.navbar')
 
-    <main class="container py-5">
-        @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
-            <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    {{-- TOAST NOTIFIKASI GLOBAL — satu-satunya tempat notifikasi muncul --}}
+    @if(session('success') || session('error') || session('info'))
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999; margin-top: 70px;">
+        <div id="globalToast" class="toast align-items-center border-0 shadow"
+             role="alert" aria-live="assertive" aria-atomic="true"
+             data-bs-autohide="true" data-bs-delay="4000">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center gap-2">
+                    @if(session('success'))
+                        <span class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
+                              style="width:28px; height:28px; background:rgba(255,255,255,0.25);">
+                            <i class="fas fa-check" style="font-size:0.75rem;"></i>
+                        </span>
+                        {{ session('success') }}
+                    @elseif(session('error'))
+                        <span class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
+                              style="width:28px; height:28px; background:rgba(255,255,255,0.25);">
+                            <i class="fas fa-times" style="font-size:0.75rem;"></i>
+                        </span>
+                        {{ session('error') }}
+                    @elseif(session('info'))
+                        <span class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
+                              style="width:28px; height:28px; background:rgba(255,255,255,0.25);">
+                            <i class="fas fa-info" style="font-size:0.75rem;"></i>
+                        </span>
+                        {{ session('info') }}
+                    @endif
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
         </div>
-        @endif
-        @if(session('info'))
-        <div class="alert alert-primary alert-dismissible fade show border-0 shadow-sm" role="alert">
-            <i class="fas fa-info-circle me-2"></i> {{ session('info') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        @endif
+    </div>
+    @endif
 
+    <style>
+        #globalToast {
+            min-width: 280px;
+            max-width: 360px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            @if(session('success'))
+            background-color: var(--amber, #C4894A);
+            color: white;
+            @elseif(session('error'))
+            background-color: #dc3545;
+            color: white;
+            @else
+            background-color: var(--ink, #1C1810);
+            color: white;
+            @endif
+        }
+    </style>
+
+    <main class="container py-5">
         @yield('content')
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        // Auto-show toast notifikasi
+        document.addEventListener('DOMContentLoaded', function () {
+            const toastEl = document.getElementById('globalToast');
+            if (toastEl) {
+                const toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            }
+        });
         // Fungsi untuk mewarnai bintang
         function updateStars(parent, val) {
             parent.querySelectorAll('.star-icon').forEach((s, index) => {

@@ -2,6 +2,7 @@
 @section('title', 'Login')
 
 @section('content')
+<div style="min-height: calc(100vh - 60px); display: flex; align-items: center; padding: 0.5rem 0 6rem 0;"><div class="w-100">
 <style>
     .auth-card {
         max-width: 420px;
@@ -57,9 +58,7 @@
     </div>
 
     <div class="card border-0 shadow-sm rounded-4 p-4">
-        @if(session('success'))
-        <div class="alert alert-success rounded-3 small py-2">{{ session('success') }}</div>
-        @endif
+
 
         <form action="{{ route('login') }}" method="POST">
             @csrf
@@ -122,4 +121,6 @@
         }
     }
 </script>
+</div>
+</div>
 @endsection

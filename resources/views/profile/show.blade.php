@@ -140,12 +140,6 @@
 <div class="row justify-content-center">
     <div class="col-lg-9">
 
-        @if(session('success'))
-            <div class="alert alert-success rounded-3 small py-2 mb-4">
-                <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
-            </div>
-        @endif
-
         {{-- HEADER PROFIL --}}
         <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
             <div class="d-flex align-items-start gap-4 flex-wrap">

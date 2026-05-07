@@ -57,12 +57,7 @@
             </div>
             <div class="col-lg-6">
                 <div class="hero-card p-4 p-md-5 position-relative overflow-hidden" style="isolation: isolate;">
-                    {{-- Watermark di pojok bawah supaya tidak menimpa teks; warna amber, di belakang konten --}}
-                    <div class="position-absolute bottom-0 end-0 pe-none user-select-none text-warning opacity-25"
-                        style="font-size: 6.5rem; line-height: 1; transform: translate(12%, 18%); z-index: 0;"
-                        aria-hidden="true">
-                        <i class="fa-solid fa-book-open"></i>
-                    </div>
+
                     <div class="position-relative" style="z-index: 1;">
                         <div class="d-flex align-items-start gap-3 mb-4">
                             <div class="feature-icon flex-shrink-0"><i class="fa-solid fa-star"></i></div>

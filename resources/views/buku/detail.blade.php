@@ -78,11 +78,7 @@
     $color = $palettes[crc32($book->google_books_id) % count($palettes)];
 @endphp
 
-@if(session('success'))
-    <div class="alert alert-success rounded-3 small py-2 mb-4">
-        <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
-    </div>
-@endif
+
 
 <div class="row g-5">
     {{-- KOLOM KIRI: Cover + Aksi --}}

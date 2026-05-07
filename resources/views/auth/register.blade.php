@@ -2,6 +2,8 @@
 @section('title', 'Daftar Akun')
 
 @section('content')
+<div style="min-height: calc(100vh - 60px); display: flex; align-items: center; padding: 0.5rem 0;">
+<div class="w-100">
 <style>
     .auth-card { max-width: 480px; margin: 0 auto; }
     .form-control {
@@ -27,9 +29,8 @@
 
 <div class="auth-card">
     <div class="text-center mb-4">
-        <i class="fas fa-book-open fs-1 mb-2" style="color: var(--amber, #C4894A);"></i>
         <h3 class="fw-bold mb-0" style="color: var(--ink);">Buat Akun Baru</h3>
-        <p class="text-muted small mt-1">Bergabung dan mulai catat koleksimu 📚</p>
+        <p class="text-muted small mt-1">Bergabung dan mulai catat koleksimu</p>
     </div>
 
     <div class="card border-0 shadow-sm rounded-4 p-4">
@@ -134,4 +135,6 @@
         }
     }
 </script>
+</div>
+</div>
 @endsection

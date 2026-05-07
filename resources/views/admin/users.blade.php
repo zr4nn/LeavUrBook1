@@ -6,22 +6,27 @@
     .table th { font-size: 0.75rem; text-transform: uppercase; color: #6c757d; font-weight: 600; }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
     <div>
         <h3 class="fw-bold mb-0" style="color: var(--ink);">Manajemen User</h3>
         <p class="text-muted small mb-0">Total {{ $users->total() }} user terdaftar</p>
     </div>
-    <a href="{{ route('admin.dashboard') }}" class="btn btn-light rounded-pill px-4 text-muted">
-        <i class="fas fa-arrow-left me-1"></i> Dashboard
-    </a>
+    <div class="d-flex gap-2 flex-wrap">
+        <form action="{{ route('admin.users') }}" method="GET" class="position-relative">
+            <input type="text" name="search" class="form-control rounded-pill ps-4 pe-5 border" 
+                   placeholder="Cari nama, email..." value="{{ $search ?? '' }}" 
+                   style="width: 240px; font-size: 0.875rem; background-color: var(--warm-white);">
+            <button type="submit" class="btn position-absolute end-0 top-50 translate-middle-y border-0" 
+                    style="color: var(--ink-muted); z-index: 5;">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+        <a href="{{ route('admin.dashboard') }}" class="btn btn-light rounded-pill px-4 text-muted border" style="white-space: nowrap; background-color: var(--warm-white);">
+            <i class="fas fa-arrow-left me-1"></i> Dashboard
+        </a>
+    </div>
 </div>
 
-@if(session('success'))
-    <div class="alert alert-success rounded-3 small py-2 mb-4">{{ session('success') }}</div>
-@endif
-@if(session('error'))
-    <div class="alert alert-danger rounded-3 small py-2 mb-4">{{ session('error') }}</div>
-@endif
 
 <div class="card border-0 shadow-sm rounded-4 p-4">
     <div class="table-responsive">
