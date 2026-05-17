@@ -47,6 +47,31 @@
         color: white;
         border-color: var(--amber, #C4894A);
     }
+
+    /* Tombol favorit */
+    .btn-favorite {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.9);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+        z-index: 4;
+        backdrop-filter: blur(4px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .btn-favorite:hover { transform: scale(1.15); background: white; }
+    .btn-favorite.active { background: #fff0f0; }
+    .btn-favorite .fa-heart { color: #ccc; }
+    .btn-favorite.active .fa-heart { color: #e74c3c; }
 </style>
 
 {{-- STATS --}}
@@ -113,11 +138,25 @@
         <div class="card h-100 border-0 shadow-sm hover-shadow transition-all rounded-4 overflow-hidden">
             <a href="{{ route('buku.detail', $book->google_books_id) }}" class="text-decoration-none text-dark">
                 <div class="position-relative">
+                    {{-- Badge status --}}
                     <span class="position-absolute top-0 end-0 m-2 badge rounded-pill z-3
                         {{ $ub->status == 'Selesai Dibaca' ? 'bg-success' : ($ub->status == 'Sedang Dibaca' ? 'bg-warning text-dark' : 'bg-secondary') }}"
                         style="font-size:0.65rem;">
                         {{ $ub->status }}
                     </span>
+
+                    {{-- Tombol Favorit --}}
+                    <button class="btn-favorite {{ $ub->is_favorite ? 'active' : '' }}"
+                            onclick="toggleFavorite(event, '{{ $book->google_books_id }}', this)"
+                            title="{{ $ub->is_favorite ? 'Hapus dari favorit' : 'Tambah ke favorit' }}">
+                        <i class="fa-{{ $ub->is_favorite ? 'solid' : 'regular' }} fa-heart"></i>
+                    </button>
+
+                    <form id="favoriteForm-{{ $book->google_books_id }}"
+                          action="{{ route('buku.favorite', $book->google_books_id) }}"
+                          method="POST" class="d-none">
+                        @csrf
+                    </form>
                     <div class="book-cover-ratio">
                         @if($book->cover_url)
                             <img src="{{ $book->cover_url }}" alt="{{ $book->judul }}">
@@ -159,10 +198,12 @@
                        class="btn btn-outline-primary btn-sm flex-grow-1 rounded-pill" style="font-size:0.75rem;">
                         <i class="fas fa-edit"></i>
                     </a>
-                    <form action="{{ route('buku.destroy', $book->google_books_id) }}" method="POST" class="flex-grow-1 m-0">
+                    <form action="{{ route('buku.destroy', $book->google_books_id) }}" method="POST"
+                          class="flex-grow-1 m-0" id="deleteForm-{{ $book->google_books_id }}">
                         @csrf @method('DELETE')
-                        <button type="submit" class="btn btn-outline-danger btn-sm w-100 rounded-pill"
-                                onclick="return confirm('Hapus dari koleksi?')" style="font-size:0.75rem;">
+                        <button type="button" class="btn btn-outline-danger btn-sm w-100 rounded-pill"
+                                style="font-size:0.75rem;"
+                                onclick="showDeleteModal('{{ $book->google_books_id }}', '{{ addslashes($book->judul) }}')">
                             <i class="fas fa-trash"></i>
                         </button>
                     </form>
@@ -188,4 +229,93 @@
     {{ $userBooks->links() }}
 </div>
 @endif
+{{-- MODAL KONFIRMASI HAPUS --}}
+<div id="deleteModalOverlay"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9998; backdrop-filter:blur(2px);"
+     onclick="closeDeleteModal()">
+</div>
+<div id="deleteModal"
+     style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+            z-index:9999; width:100%; max-width:380px; padding: 0 1rem;">
+    <div class="card border-0 shadow-lg rounded-4 p-4">
+        <div class="text-center mb-3">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                 style="width:56px; height:56px; background:#fff5f5;">
+                <i class="fas fa-trash-alt text-danger" style="font-size:1.4rem;"></i>
+            </div>
+            <h5 class="fw-bold mb-1" style="color:var(--ink);">Hapus dari Koleksi?</h5>
+            <p class="text-muted small mb-0">
+                Buku <strong id="deleteBookTitle"></strong> akan dihapus dari koleksimu.
+            </p>
+        </div>
+        <div class="d-flex gap-2 mt-3">
+            <button type="button" class="btn btn-light rounded-pill flex-grow-1 fw-medium"
+                    onclick="closeDeleteModal()">Batal</button>
+            <button type="button" class="btn btn-danger rounded-pill flex-grow-1 fw-medium"
+                    id="confirmDeleteBtn" onclick="submitDelete()">
+                <i class="fas fa-trash me-1"></i> Hapus
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ── Delete Modal ──────────────────────────────────────────────
+    let deleteTargetId = null;
+
+    function showDeleteModal(googleBooksId, title) {
+        deleteTargetId = googleBooksId;
+        document.getElementById('deleteBookTitle').textContent = title;
+        document.getElementById('deleteModalOverlay').style.display = 'block';
+        document.getElementById('deleteModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDeleteModal() {
+        deleteTargetId = null;
+        document.getElementById('deleteModalOverlay').style.display = 'none';
+        document.getElementById('deleteModal').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    function submitDelete() {
+        if (!deleteTargetId) return;
+        document.getElementById('deleteForm-' + deleteTargetId).submit();
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDeleteModal(); });
+
+    // ── Toggle Favorite (AJAX) ────────────────────────────────────
+    function toggleFavorite(event, googleBooksId, btn) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const form   = document.getElementById('favoriteForm-' + googleBooksId);
+        const icon   = btn.querySelector('i');
+        const csrfToken = form.querySelector('input[name="_token"]').value;
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({})
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.is_favorite) {
+                btn.classList.add('active');
+                icon.classList.replace('fa-regular', 'fa-solid');
+                btn.title = 'Hapus dari favorit';
+            } else {
+                btn.classList.remove('active');
+                icon.classList.replace('fa-solid', 'fa-regular');
+                btn.title = 'Tambah ke favorit';
+            }
+        })
+        .catch(err => console.error('Toggle favorite error:', err));
+    }
+</script>
 @endsection

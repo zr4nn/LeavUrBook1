@@ -3,8 +3,8 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BukuController;
-use App\Http\Controllers\LandingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\LandingController;
 use Illuminate\Support\Facades\Route;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -24,17 +24,14 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 // ─────────────────────────────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
 
-    // Rak koleksi pengguna — tidak untuk admin (harus sebelum /buku/{id} agar /buku/cari tidak tertangkap sebagai ID)
-    Route::middleware('reject.admin.userbooks')->group(function () {
-        Route::get('/buku',                    [BukuController::class, 'index'])->name('buku.index');
-        Route::get('/buku/cari',               [BukuController::class, 'search'])->name('buku.search');
-        Route::post('/buku',                   [BukuController::class, 'store'])->name('buku.store');
-        Route::put('/buku/{googleBooksId}',    [BukuController::class, 'update'])->name('buku.update');
-        Route::delete('/buku/{googleBooksId}', [BukuController::class, 'destroy'])->name('buku.destroy');
-    });
-
-    // Detail buku — admin boleh lihat (tanpa koleksi pribadi di UI)
-    Route::get('/buku/{googleBooksId}', [BukuController::class, 'detail'])->name('buku.detail');
+    // Buku
+    Route::get('/buku',                    [BukuController::class, 'index'])->name('buku.index');
+    Route::get('/buku/cari',               [BukuController::class, 'search'])->name('buku.search');
+    Route::get('/buku/{googleBooksId}',    [BukuController::class, 'detail'])->name('buku.detail');
+    Route::post('/buku',                   [BukuController::class, 'store'])->name('buku.store');
+    Route::put('/buku/{googleBooksId}',    [BukuController::class, 'update'])->name('buku.update');
+    Route::post('/buku/{googleBooksId}/favorite', [BukuController::class, 'toggleFavorite'])->name('buku.favorite');
+    Route::delete('/buku/{googleBooksId}',         [BukuController::class, 'destroy'])->name('buku.destroy');
 
     // Profil sendiri
     Route::get('/profile',                [ProfileController::class, 'show'])->name('profile.show');

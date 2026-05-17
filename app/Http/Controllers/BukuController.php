@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
-use App\Models\UserBook;    
+use App\Models\UserBook;
 use App\Services\GoogleBooksService;
 use Illuminate\Http\Request;
 
@@ -12,37 +12,37 @@ class BukuController extends Controller
     public function __construct(private GoogleBooksService $googleBooks) {}
 
     // -------------------------------------------------------------------------
-    // INDEX — koleksi buku milik user yang login
+    // INDEX — koleksi buku milik user, dengan pagination & filter
     // -------------------------------------------------------------------------
     public function index(Request $request)
     {
-        $allUserBooks = auth()->user()->userBooks()->get();
-
-        $stats = [
-            'total'         => $allUserBooks->count(),
-            'sedang_dibaca' => $allUserBooks->where('status', 'Sedang Dibaca')->count(),
-            'selesai'       => $allUserBooks->where('status', 'Selesai Dibaca')->count(),
-            'daftar_tunggu' => $allUserBooks->where('status', 'Daftar Tunggu')->count(),
-        ];
-
-        $status = $request->input('status', 'semua');
+        $status = $request->input('status'); // filter opsional
 
         $query = auth()->user()
             ->userBooks()
             ->with('book')
             ->latest();
 
-        if ($status !== 'semua') {
+        if ($status && in_array($status, ['Sedang Dibaca', 'Selesai Dibaca', 'Daftar Tunggu'])) {
             $query->where('status', $status);
         }
 
         $userBooks = $query->paginate(12)->withQueryString();
 
+        // Stats selalu dari semua buku (tidak terfilter)
+        $allBooks = auth()->user()->userBooks()->get();
+        $stats = [
+            'total'         => $allBooks->count(),
+            'sedang_dibaca' => $allBooks->where('status', 'Sedang Dibaca')->count(),
+            'selesai'       => $allBooks->where('status', 'Selesai Dibaca')->count(),
+            'daftar_tunggu' => $allBooks->where('status', 'Daftar Tunggu')->count(),
+        ];
+
         return view('buku.index', compact('userBooks', 'stats', 'status'));
     }
 
     // -------------------------------------------------------------------------
-    // SEARCH — halaman pencarian buku via Google Books API
+    // SEARCH
     // -------------------------------------------------------------------------
     public function search(Request $request)
     {
@@ -52,7 +52,6 @@ class BukuController extends Controller
         if ($query) {
             $results = $this->googleBooks->search($query, 20);
 
-            // Tandai buku yang sudah ada di koleksi user
             $myGoogleIds = auth()->user()
                 ->books()
                 ->pluck('google_books_id')
@@ -68,29 +67,25 @@ class BukuController extends Controller
     }
 
     // -------------------------------------------------------------------------
-    // DETAIL — halaman detail buku (Letterboxd style)
+    // DETAIL
     // -------------------------------------------------------------------------
     public function detail(string $googleBooksId)
     {
-        // Cek apakah sudah ada di DB kita
         $book = Book::where('google_books_id', $googleBooksId)->first();
 
-        // Kalau belum, ambil dari API dan simpan
         if (!$book) {
             $data = $this->googleBooks->find($googleBooksId);
             if (!$data) abort(404, 'Buku tidak ditemukan.');
             $book = Book::create($data);
         }
 
-        // Data koleksi hanya untuk pengguna biasa (bukan admin)
         $userBook = null;
-        if (auth()->check() && ! auth()->user()->isAdmin()) {
+        if (auth()->check()) {
             $userBook = UserBook::where('user_id', auth()->id())
                                 ->where('book_id', $book->id)
                                 ->first();
         }
 
-        // Ulasan publik dari semua user (kecuali milik sendiri)
         $reviews = UserBook::where('book_id', $book->id)
                            ->whereNotNull('ulasan')
                            ->where('user_id', '!=', auth()->id() ?? 0)
@@ -98,7 +93,6 @@ class BukuController extends Controller
                            ->latest()
                            ->get();
 
-        // Statistik buku
         $stats = [
             'total_koleksi'  => UserBook::where('book_id', $book->id)->count(),
             'selesai_dibaca' => UserBook::where('book_id', $book->id)->where('status', 'Selesai Dibaca')->count(),
@@ -109,7 +103,7 @@ class BukuController extends Controller
     }
 
     // -------------------------------------------------------------------------
-    // STORE — tambah/update buku ke koleksi user
+    // STORE
     // -------------------------------------------------------------------------
     public function store(Request $request)
     {
@@ -123,18 +117,15 @@ class BukuController extends Controller
             'tanggal_selesai'  => 'nullable|date|after_or_equal:tanggal_mulai',
         ]);
 
-        // Rating hanya boleh jika status Selesai Dibaca
         if ($validated['status'] !== 'Selesai Dibaca') {
             $validated['rating'] = null;
         }
 
-        // Pastikan buku ada di DB kita
         $book = Book::firstOrCreate(
             ['google_books_id' => $validated['google_books_id']],
             $this->googleBooks->find($validated['google_books_id']) ?? []
         );
 
-        // Upsert ke user_books
         UserBook::updateOrCreate(
             ['user_id' => auth()->id(), 'book_id' => $book->id],
             [
@@ -152,7 +143,7 @@ class BukuController extends Controller
     }
 
     // -------------------------------------------------------------------------
-    // UPDATE — update data koleksi user untuk buku tertentu
+    // UPDATE
     // -------------------------------------------------------------------------
     public function update(Request $request, string $googleBooksId)
     {
@@ -165,7 +156,6 @@ class BukuController extends Controller
             'tanggal_selesai'  => 'nullable|date|after_or_equal:tanggal_mulai',
         ]);
 
-        // Rating hanya boleh jika status Selesai Dibaca
         if ($validated['status'] !== 'Selesai Dibaca') {
             $validated['rating'] = null;
         }
@@ -182,7 +172,34 @@ class BukuController extends Controller
     }
 
     // -------------------------------------------------------------------------
-    // DESTROY — hapus buku dari koleksi user
+    // TOGGLE FAVORITE
+    // -------------------------------------------------------------------------
+    public function toggleFavorite(string $googleBooksId)
+    {
+        $book = Book::where('google_books_id', $googleBooksId)->firstOrFail();
+
+        $userBook = UserBook::where('user_id', auth()->id())
+                            ->where('book_id', $book->id)
+                            ->firstOrFail();
+
+        $userBook->update(['is_favorite' => !$userBook->is_favorite]);
+
+        $message = $userBook->is_favorite
+            ? 'Buku ditambahkan ke favorit!'
+            : 'Buku dihapus dari favorit.';
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'is_favorite' => $userBook->is_favorite,
+                'message'     => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
+    }
+
+    // -------------------------------------------------------------------------
+    // DESTROY
     // -------------------------------------------------------------------------
     public function destroy(string $googleBooksId)
     {

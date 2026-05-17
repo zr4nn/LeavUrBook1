@@ -48,14 +48,21 @@ class ProfileController extends Controller
                              ->latest()
                              ->get();
 
+        $favoriteBooks = UserBook::where('user_id', $user->id)
+                                 ->where('is_favorite', true)
+                                 ->with('book')
+                                 ->latest()
+                                 ->get();
+
         $stats = [
             'total'         => $userBooks->count(),
             'sedang_dibaca' => $userBooks->where('status', 'Sedang Dibaca')->count(),
             'selesai'       => $userBooks->where('status', 'Selesai Dibaca')->count(),
             'daftar_tunggu' => $userBooks->where('status', 'Daftar Tunggu')->count(),
+            'favorit'       => $favoriteBooks->count(),
         ];
 
-        return view('profile.public', compact('user', 'userBooks', 'stats'));
+        return view('profile.public', compact('user', 'userBooks', 'favoriteBooks', 'stats'));
     }
 
     // -------------------------------------------------------------------------

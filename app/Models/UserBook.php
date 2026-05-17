@@ -17,13 +17,15 @@ class UserBook extends Model
         'halaman_saat_ini',
         'tanggal_mulai',
         'tanggal_selesai',
+        'is_favorite',
     ];
 
     protected $casts = [
-        'tanggal_mulai'   => 'date',
-        'tanggal_selesai' => 'date',
-        'rating'          => 'integer',
-        'halaman_saat_ini'=> 'integer',
+        'tanggal_mulai'    => 'date',
+        'tanggal_selesai'  => 'date',
+        'rating'           => 'integer',
+        'halaman_saat_ini' => 'integer',
+        'is_favorite'      => 'boolean',
     ];
 
     public function user()
